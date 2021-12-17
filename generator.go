@@ -97,7 +97,7 @@ func StretchedNoise(pos vec2, perms []int, grads []vec2, stretch float64) float6
 	return CubicInterpolation(p, fracY)
 }
 
-func GenerateNoiseMap(width int, height int, octaves int, stretch float64, multiplier float64) []float64 {
+func GenerateNoiseMap(width int, height int, octave float64, stretch float64, multiplier float64) []float64 {
 
 	perms := GeneratePermutations()
 	grads := GenerateGradients()
@@ -106,25 +106,9 @@ func GenerateNoiseMap(width int, height int, octaves int, stretch float64, multi
 	index := 0
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
-
-			total := 0.0
-			frequency := 1.0
-			amplitude := 1.0
-			maxValue := 0.0
-
-			for octave := 0; octave < octaves; octave++ {
-				pos := vec2{
-					float64(x) * frequency,
-					float64(y) * frequency}
-				noise := StretchedNoise(pos, perms, grads, stretch) * multiplier * amplitude
-				total += noise / 2.0
-				maxValue += amplitude
-				amplitude *= 0.25
-				frequency *= 2
-			}
-
-			norm := total / maxValue
-			data[index] = norm
+			pos := vec2{float64(x) * octave, float64(y) * octave}
+			data[index] = StretchedNoise(pos, perms, grads, stretch) * multiplier
+			data[index] /= 2.0
 			index++
 		}
 	}
@@ -162,11 +146,11 @@ func RenderToImage() {
 	const imageWidth = 600
 	const imageHeight = 600
 
-	multipliers := [3]float64{0.6, 0.3, 0.1}
+	multipliers := [3]float64{1.0, 0.5, 0.25}
 
-	noiseData1 := GenerateNoiseMap(imageWidth, imageHeight, 2, 40, multipliers[0])
-	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 3, 22, multipliers[1])
-	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 1, 10, multipliers[2])
+	noiseData1 := GenerateNoiseMap(imageWidth, imageHeight, 1, 40, multipliers[0])
+	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 2, 22, multipliers[1])
+	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 4, 10, multipliers[2])
 
 	mapData := MergeNoiseData(multipliers[:], noiseData1, noiseData2, noiseData3)
 	colors := NoiseDataToColor(mapData)

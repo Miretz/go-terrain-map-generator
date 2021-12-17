@@ -25,9 +25,9 @@ func Clamp(x, min, max float64) float64 {
 
 func WriteColor(pixelColor *color) string {
 	return fmt.Sprintf("%d %d %d\n",
-		int32(512*Clamp(pixelColor.r, 0.0, 0.5)),
-		int32(512*Clamp(pixelColor.g, 0.0, 0.5)),
-		int32(512*Clamp(pixelColor.b, 0.0, 0.5)))
+		int32(512*Clamp(pixelColor.r, 0.0, 0.499)),
+		int32(512*Clamp(pixelColor.g, 0.0, 0.499)),
+		int32(512*Clamp(pixelColor.b, 0.0, 0.499)))
 }
 
 func WriteToPPMFile(outputFile string, imageWidth int, imageHeight int, colorData []color) {
