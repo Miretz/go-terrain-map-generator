@@ -117,7 +117,7 @@ func GenerateNoiseMap(width int, height int, octaves int, stretch float64, multi
 					float64(x) * frequency,
 					float64(y) * frequency}
 				noise := StretchedNoise(pos, perms, grads, stretch) * multiplier * amplitude
-				total += noise / (1.0 + 2.0)
+				total += noise / 2.0
 				maxValue += amplitude
 				amplitude *= 0.25
 				frequency *= 2
@@ -164,9 +164,9 @@ func RenderToImage() {
 
 	multipliers := [3]float64{0.6, 0.3, 0.1}
 
-	noiseData1 := GenerateNoiseMap(imageWidth, imageHeight, 6, 60, multipliers[0])
-	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 5, 22, multipliers[1])
-	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 3, 10, multipliers[2])
+	noiseData1 := GenerateNoiseMap(imageWidth, imageHeight, 2, 40, multipliers[0])
+	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 3, 22, multipliers[1])
+	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 1, 10, multipliers[2])
 
 	mapData := MergeNoiseData(multipliers[:], noiseData1, noiseData2, noiseData3)
 	colors := NoiseDataToColor(mapData)
