@@ -1,2 +1,6 @@
 # go-terrain-map-generator
-Generate Terrain Maps using Perlin Noise
+Generates Terrain Maps using Perlin Noise
+
+<img src="screenshot.png">
+
+Work in progress
