@@ -108,7 +108,6 @@ func GenerateNoiseMap(width int, height int, octave float64, stretch float64, mu
 		for x := 0; x < width; x++ {
 			pos := vec2{float64(x) * octave, float64(y) * octave}
 			data[index] = StretchedNoise(pos, perms, grads, stretch) * multiplier
-			data[index] /= 2.0
 			index++
 		}
 	}
@@ -116,7 +115,7 @@ func GenerateNoiseMap(width int, height int, octave float64, stretch float64, mu
 	return data
 }
 
-func MergeNoiseData(multipliers []float64, layers ...[]float64) []float64 {
+func MergeNoiseData(multipliers []float64, redistribution float64, waterHeight float64, layers ...[]float64) []float64 {
 	result := make([]float64, len(layers[0]))
 
 	sumMultipliers := 0.0
@@ -129,6 +128,10 @@ func MergeNoiseData(multipliers []float64, layers ...[]float64) []float64 {
 			result[i] += ns[i]
 		}
 		result[i] /= sumMultipliers
+		result[i] = math.Pow(result[i], redistribution)
+		if result[i] < waterHeight {
+			result[i] = 0.0
+		}
 	}
 
 	return result
@@ -146,13 +149,16 @@ func RenderToImage() {
 	const imageWidth = 600
 	const imageHeight = 600
 
-	multipliers := [3]float64{1.0, 0.5, 0.25}
+	const redistribution = 1.8
+	const waterHeight = 0.13
+
+	multipliers := []float64{1.0, 0.5, 0.25}
 
 	noiseData1 := GenerateNoiseMap(imageWidth, imageHeight, 1, 40, multipliers[0])
 	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 2, 22, multipliers[1])
 	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 4, 10, multipliers[2])
 
-	mapData := MergeNoiseData(multipliers[:], noiseData1, noiseData2, noiseData3)
+	mapData := MergeNoiseData(multipliers, redistribution, waterHeight, noiseData1, noiseData2, noiseData3)
 	colors := NoiseDataToColor(mapData)
 
 	WriteToPPMFile("output.ppm", imageWidth, imageHeight, colors)
