@@ -7,11 +7,13 @@ import (
 	"time"
 )
 
+// Fade function as defined by Ken Perlin. This will smooth out the result.
 func Fade(t float64) float64 {
 	t = math.Abs(t)
 	return t * t * t * (t*(t*6-15) + 10)
 }
 
+// Generates a randomly arranged array of 512 values ranging between 0-255 inclusive
 func GeneratePermutations() []int {
 	temp := make([]int, 256)
 	for i := 0; i < 256; i++ {
@@ -27,6 +29,7 @@ func GeneratePermutations() []int {
 	return result
 }
 
+// Generates 2d gradients which are uses for composing the final noise pattern
 func GenerateGradients() []vec2 {
 	grads := make([]vec2, 256)
 
@@ -45,10 +48,12 @@ func GenerateGradients() []vec2 {
 	return grads
 }
 
+// Applies Fade on a 2d vector and multiplies the it's values
 func Q(uv vec2) float64 {
 	return Fade(uv.x) * Fade(uv.y)
 }
 
+// Generate a perlin noise point from predefined permutations and gradients
 func Noise(pos vec2, perms []int, grads []vec2) float64 {
 	cell := vec2{math.Floor(pos.x), math.Floor(pos.y)}
 	total := 0.0
@@ -64,11 +69,12 @@ func Noise(pos vec2, perms []int, grads []vec2) float64 {
 	return math.Max(math.Min(total, 1.0), -1.0)
 }
 
+// Cubic interpolation of the given values float values
 func CubicInterpolation(p []float64, x float64) float64 {
-	return CubicInterpAux(p[0], p[1], p[2], p[3], x)
+	return cubicInterpAux(p[0], p[1], p[2], p[3], x)
 }
 
-func CubicInterpAux(v0, v1, v2, v3, x float64) float64 {
+func cubicInterpAux(v0, v1, v2, v3, x float64) float64 {
 	P := (v3 - v2) - (v0 - v1)
 	Q := (v0 - v1) - P
 	R := v2 - v0
@@ -76,6 +82,7 @@ func CubicInterpAux(v0, v1, v2, v3, x float64) float64 {
 	return P*x*x*x + Q*x*x + R*x + S
 }
 
+// Generates a perlin noise value where each point is stretched over multiple points and smoothened
 func StretchedNoise(pos vec2, perms []int, grads []vec2, stretch float64) float64 {
 	xf := pos.x / stretch
 	yf := pos.y / stretch
@@ -97,6 +104,7 @@ func StretchedNoise(pos vec2, perms []int, grads []vec2, stretch float64) float6
 	return CubicInterpolation(p, fracY)
 }
 
+// Generates a unique noise pattern with the given parameters
 func GenerateNoiseMap(width int, height int, octave float64, stretch float64, multiplier float64) []float64 {
 
 	rand.Seed(time.Now().UnixNano())
@@ -120,6 +128,7 @@ func GenerateNoiseMap(width int, height int, octave float64, stretch float64, mu
 	return data
 }
 
+// Merges multiple noise patterns and applies redistribution and water level cutoff
 func MergeNoiseData(multipliers []float64, redistribution float64, waterHeight float64, layers ...[]float64) []float64 {
 	result := make([]float64, len(layers[0]))
 
@@ -144,6 +153,7 @@ func MergeNoiseData(multipliers []float64, redistribution float64, waterHeight f
 	return result
 }
 
+// Converts a float64 array into an array of color values using the same value per each channel
 func NoiseDataToColor(noiseData []float64) []color {
 	colors := make([]color, len(noiseData))
 	for i, n := range noiseData {
@@ -152,6 +162,7 @@ func NoiseDataToColor(noiseData []float64) []color {
 	return colors
 }
 
+// Generates a terrain heightmap using perlin noise and store the result in a PPM file
 func RenderToImage() {
 	const imageWidth = 600
 	const imageHeight = 600
