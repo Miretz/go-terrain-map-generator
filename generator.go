@@ -99,6 +99,8 @@ func StretchedNoise(pos vec2, perms []int, grads []vec2, stretch float64) float6
 
 func GenerateNoiseMap(width int, height int, octave float64, stretch float64, multiplier float64) []float64 {
 
+	rand.Seed(time.Now().UnixNano())
+
 	perms := GeneratePermutations()
 	grads := GenerateGradients()
 	data := make([]float64, width*height)
@@ -154,16 +156,17 @@ func RenderToImage() {
 	const imageWidth = 600
 	const imageHeight = 600
 
-	const redistribution = 0.8
-	const waterHeight = 0.2
+	const redistribution = 0.72
+	const waterHeight = 0.1
 
 	multipliers := []float64{1.0, 0.5, 0.25}
 
 	noiseData1 := GenerateNoiseMap(imageWidth, imageHeight, 1, 100, multipliers[0])
-	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 3, 60, multipliers[1])
-	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 5, 10, multipliers[2])
+	noiseData2 := GenerateNoiseMap(imageWidth, imageHeight, 2, 100, multipliers[1])
+	noiseData3 := GenerateNoiseMap(imageWidth, imageHeight, 4, 100, multipliers[2])
 
 	mapData := MergeNoiseData(multipliers, redistribution, waterHeight, noiseData1, noiseData2, noiseData3)
+
 	colors := NoiseDataToColor(mapData)
 
 	WriteToPPMFile("output.ppm", imageWidth, imageHeight, colors)
