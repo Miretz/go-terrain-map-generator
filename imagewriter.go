@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"log"
+	"math"
 	"os"
 )
 
@@ -23,11 +24,16 @@ func Clamp(x, min, max float64) float64 {
 	return x
 }
 
+func MapRange(x, inMin, inMax, outMin, outMax float64) float64 {
+	slope := 1.0 * (outMax - outMin) / (inMax - inMin)
+	return outMin + math.Round(slope*(x-inMin))
+}
+
 func WriteColor(pixelColor *color) string {
 	return fmt.Sprintf("%d %d %d\n",
-		int32(512*Clamp(pixelColor.r, 0.0, 0.499)),
-		int32(512*Clamp(pixelColor.g, 0.0, 0.499)),
-		int32(512*Clamp(pixelColor.b, 0.0, 0.499)))
+		int(math.Round(MapRange(pixelColor.r, 0.0, 1.0, 0.0, 255.0))),
+		int(math.Round(MapRange(pixelColor.g, 0.0, 1.0, 0.0, 255.0))),
+		int(math.Round(MapRange(pixelColor.b, 0.0, 1.0, 0.0, 255.0))))
 }
 
 func WriteToPPMFile(outputFile string, imageWidth int, imageHeight int, colorData []color) {
